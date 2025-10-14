@@ -28,6 +28,16 @@ class PageFlipDemo extends StatefulWidget {
 class _PageFlipDemoState extends State<PageFlipDemo> {
   late PageFlipController _controller;
 
+  // Toggle these to test which component causes issues
+  // Start with everything OFF, then enable one at a time to find the culprit
+  static const bool useStack = false;
+  static const bool useScrollView = true;
+  static const bool usePositionedIndicator = false;
+  static const bool useEmptySizedBox = false;
+  static const bool useBookCover = false;
+  static const bool useBookMetadata = false;
+  static const bool useConditionalWidget = false;
+
   @override
   void initState() {
     super.initState();
@@ -35,35 +45,59 @@ class _PageFlipDemoState extends State<PageFlipDemo> {
   }
 
   Widget _buildPage(int index) {
+    // Simple version without Stack
+    if (!useStack) {
+      return Container(
+        color: Colors.white,
+        child: Center(
+          child: Text(
+            'Page ${index + 1}',
+            style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+    }
+
+    // Build content
+    Widget content = Column(
+      children: [
+        const SizedBox(height: 16),
+        _PageIndicator(currentPage: index, totalPages: 3),
+        if (useBookCover) _BookCoverWidget(pageIndex: index),
+        if (useBookMetadata) _BookMetadataWidget(pageIndex: index),
+        if (useConditionalWidget)
+          if (index == 0)
+            const _AdditionalInfoWidget()
+          else
+            const _SummaryWidget(),
+      ],
+    );
+
+    // Optionally wrap in ScrollView
+    if (useScrollView) {
+      content = SingleChildScrollView(child: content);
+    }
+
+    // Build Stack layers
+    List<Widget> stackChildren = [content];
+
+    if (usePositionedIndicator) {
+      stackChildren.add(
+        Positioned(
+          top: 16,
+          right: 16,
+          child: _PageIndicator(currentPage: index, totalPages: 3),
+        ),
+      );
+    }
+
+    if (useEmptySizedBox) {
+      stackChildren.add(const SizedBox(height: 0, width: 0));
+    }
+
     return Container(
       color: Colors.white,
-      child: Stack(
-        children: [
-          // [0] SingleChildScrollView with main content
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: 16),
-                _PageIndicator(currentPage: index, totalPages: 3),
-                _BookCoverWidget(pageIndex: index),
-                _BookMetadataWidget(pageIndex: index),
-                if (index == 0)
-                  const _AdditionalInfoWidget()
-                else
-                  const _SummaryWidget(),
-              ],
-            ),
-          ),
-          // [1] PageIndicator (positioned)
-          Positioned(
-            top: 16,
-            right: 16,
-            child: _PageIndicator(currentPage: index, totalPages: 3),
-          ),
-          // [2] SizedBox (height: 0, width: 0)
-          const SizedBox(height: 0, width: 0),
-        ],
-      ),
+      child: Stack(children: stackChildren),
     );
   }
 
