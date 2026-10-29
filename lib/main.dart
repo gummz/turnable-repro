@@ -30,13 +30,13 @@ class _PageFlipDemoState extends State<PageFlipDemo> {
 
   // Toggle these to test which component causes issues
   // Start with everything OFF, then enable one at a time to find the culprit
-  static const bool useStack = false;
+  static const bool useStack = true;
   static const bool useScrollView = true;
-  static const bool usePositionedIndicator = false;
-  static const bool useEmptySizedBox = false;
-  static const bool useBookCover = false;
-  static const bool useBookMetadata = false;
-  static const bool useConditionalWidget = false;
+  static const bool usePositionedIndicator = true;
+  static const bool useEmptySizedBox = true;
+  static const bool useBookCover = true;
+  static const bool useBookMetadata = true;
+  static const bool useConditionalWidget = true;
 
   @override
   void initState() {
